@@ -6,7 +6,7 @@ import {
 export interface TableColumn<T> {
     id: string;
     label: string;
-    accessor?: keyof T;
+    propName?: keyof T;
     render?: (row: T) => React.ReactNode;
     align?: 'left' | 'center' | 'right';
 }
@@ -57,7 +57,7 @@ export function DataTable<T>({
                         <TableRow>
                             <TableCell colSpan={columns.length} align="center" sx={{ py: 6 }}>
                                 <CircularProgress size={24} sx={{ mb: 2 }} />
-                                <Typography color="text.secondary">Carregando dados...</Typography>
+                                <Typography color="text.secondary">Carregando...</Typography>
                             </TableCell>
                         </TableRow>
                     ) : data.length === 0 ? (
@@ -71,7 +71,7 @@ export function DataTable<T>({
                             <TableRow hover key={rowIndex} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
                                 {columns.map((col) => (
                                     <TableCell key={col.id} align={col.align || 'left'}>
-                                        {col.render ? col.render(row) : col.accessor ? String(row[col.accessor]) : null}
+                                        {col.render ? col.render(row) : col.propName ? String(row[col.propName]) : null}
                                     </TableCell>
                                 ))}
                             </TableRow>
