@@ -13,8 +13,9 @@ import { DataTable } from '../../components/ui/DataTable';
 import type { TableColumn } from '../../components/ui/DataTable';
 import type { Contract } from './contracts.types';
 import { useCustomersQuery } from '../customers/hooks/useCustomersApi';
-import { useUsersQuery } from '../users/hooks/useUsersQuery';
+import { useUsersQuery } from '../users/hooks/useUsersApi';
 import { ContractCreateDialog } from './components/ContractCreateDialog';
+import type { User } from '../users/users.types';
 
 export function ContractsList() {
     const { data: contracts, isLoading: isLoadingContracts, isError: isErrorContracts } = useContractsQuery();
@@ -90,7 +91,7 @@ export function ContractsList() {
         {
             id: 'managerName',
             label: 'Responsável',
-            render: (row) => users?.find((user) => user.id === row.managerId)?.name || `Usuário ${row.managerId}`
+            render: (row) => users?.find((user: User) => user.id === row.managerId)?.name || `Usuário ${row.managerId}`
         },
         {
             id: 'status',
@@ -164,7 +165,7 @@ export function ContractsList() {
                 open={viewOpen}
                 contract={selectedContract}
                 customer={customers?.find((customer) => customer.id === selectedContract?.customerId)}
-                user={users?.find((user) => user.id === selectedContract?.managerId)}
+                user={users?.find((user: User) => user.id === selectedContract?.managerId)}
                 onClose={() => setViewOpen(false)}
                 onEdit={handleViewToEdit}
             />

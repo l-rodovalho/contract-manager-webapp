@@ -10,4 +10,5 @@ export interface User {
     lastLogin: Date | null;
     createdAt: Date;
     updatedAt: Date;
+    version: number;
 }
