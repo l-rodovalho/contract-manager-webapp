@@ -6,6 +6,8 @@ import { Add, MoreVert, Search, FilterList } from '@mui/icons-material';
 
 import { useContractsQuery } from './hooks/useContractsQuery';
 import { ContractStatusChip } from './components/ContractStatusChip';
+import { ContractViewDialog } from './components/ContractViewDialog';
+import { ContractEditDialog } from './components/ContractEditDialog';
 import { DataTable } from '../../components/ui/DataTable';
 import type { TableColumn } from '../../components/ui/DataTable';
 import type { Contract } from './contracts.types';
@@ -18,10 +20,35 @@ export function ContractsList() {
     const { data: users, isLoading: isLoadingUsers, isError: isErrorUsers } = useUsersQuery();
 
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
     const openActionMenu = Boolean(anchorEl);
 
-    const handleOpenMenu = (event: React.MouseEvent<HTMLButtonElement>) => setAnchorEl(event.currentTarget);
+    // Dialogs
+    const [viewOpen, setViewOpen] = useState(false);
+    const [editOpen, setEditOpen] = useState(false);
+
+    const handleOpenMenu = (event: React.MouseEvent<HTMLButtonElement>, row: Contract) => {
+        setAnchorEl(event.currentTarget);
+        setSelectedContract(row);
+    };
     const handleCloseMenu = () => setAnchorEl(null);
+
+    const handleOpenView = () => {
+        handleCloseMenu();
+        setViewOpen(true);
+    };
+    const handleOpenEdit = () => {
+        handleCloseMenu();
+        setEditOpen(true);
+    };
+    const handleViewToEdit = () => {
+        setViewOpen(false);
+        setEditOpen(true);
+    };
+
+    const handleSave = (updated: Partial<Contract>) => {
+        console.log('Saving contract changes:', updated);
+    };
 
     const formatCurrency = (value: number) =>
         new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
@@ -48,7 +75,7 @@ export function ContractsList() {
         { id: 'title', label: 'Título', propName: 'title' },
         {
             id: 'value',
-            label: 'Valor (ARR)',
+            label: 'Valor',
             render: (row) => formatCurrency(row.value)
         },
         {
@@ -70,8 +97,8 @@ export function ContractsList() {
             id: 'actions',
             label: 'Ações',
             align: 'right',
-            render: () => (
-                <IconButton size="small" onClick={handleOpenMenu}>
+            render: (row) => (
+                <IconButton size="small" onClick={(e) => handleOpenMenu(e, row)} id={`contract-menu-btn-${row.id}`}>
                     <MoreVert fontSize="small" />
                 </IconButton>
             )
@@ -120,10 +147,27 @@ export function ContractsList() {
                 transformOrigin={{ horizontal: 'right', vertical: 'top' }}
                 anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
             >
-                <MenuItem onClick={handleCloseMenu} sx={{ fontSize: '0.875rem' }}>Visualizar Detalhes</MenuItem>
-                <MenuItem onClick={handleCloseMenu} sx={{ fontSize: '0.875rem' }}>Editar Contrato</MenuItem>
-                <MenuItem onClick={handleCloseMenu} sx={{ fontSize: '0.875rem', color: 'error.main' }}>Arquivar</MenuItem>
+                <MenuItem onClick={handleOpenView} sx={{ fontSize: '0.875rem' }}>Visualizar Detalhes</MenuItem>
+                <MenuItem onClick={handleOpenEdit} sx={{ fontSize: '0.875rem' }}>Editar Contrato</MenuItem>
+                <MenuItem onClick={handleCloseMenu} sx={{ fontSize: '0.875rem', color: 'error.main' }}>Cancelar Contrato</MenuItem>
             </Menu>
+
+            <ContractViewDialog
+                open={viewOpen}
+                contract={selectedContract}
+                customer={customers?.find((customer) => customer.id === selectedContract?.customerId)}
+                user={users?.find((user) => user.id === selectedContract?.managerId)}
+                onClose={() => setViewOpen(false)}
+                onEdit={handleViewToEdit}
+            />
+            <ContractEditDialog
+                open={editOpen}
+                contract={selectedContract}
+                customers={customers}
+                users={users}
+                onClose={() => setEditOpen(false)}
+                onSave={handleSave}
+            />
         </Box>
     );
 }
