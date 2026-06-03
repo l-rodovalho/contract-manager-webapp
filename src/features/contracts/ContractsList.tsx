@@ -2,7 +2,7 @@ import { useState, useMemo } from 'react';
 import {
     Box, Typography, Button, Paper, IconButton, InputBase, Toolbar, Menu, MenuItem
 } from '@mui/material';
-import { Add, MoreVert, Search, FilterList } from '@mui/icons-material';
+import { Add, MoreVert, Search } from '@mui/icons-material';
 
 import { useContractsQuery, useCancelContractMutation } from './hooks/useContractsApi';
 import { formatDate } from '../../lib/dateUtils';
@@ -12,7 +12,7 @@ import { ContractEditDialog } from './components/ContractEditDialog';
 import { DataTable } from '../../components/ui/DataTable';
 import type { TableColumn } from '../../components/ui/DataTable';
 import type { Contract } from './contracts.types';
-import { useCustomersQuery } from '../customers/hooks/useCustomersQuery';
+import { useCustomersQuery } from '../customers/hooks/useCustomersApi';
 import { useUsersQuery } from '../users/hooks/useUsersQuery';
 import { ContractCreateDialog } from './components/ContractCreateDialog';
 
@@ -136,7 +136,6 @@ export function ContractsList() {
                         <InputBase placeholder="Buscar por cliente ou ID..." sx={{ ml: 1, flex: 1, fontSize: '0.875rem' }} />
                     </Box>
                     <Box sx={{ flexGrow: 1 }} />
-                    <Button startIcon={<FilterList />} color="inherit" sx={{ color: 'text.secondary' }}>Filtros</Button>
                 </Toolbar>
 
                 <DataTable

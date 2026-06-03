@@ -44,11 +44,11 @@ export function ContractCreateDialog({ open, customers, users, onClose, onSucces
         createContract.mutate(
             {
                 customerId: form.customerId!,
-                title: form.title,
-                managerId: form.managerId,
+                title: form.title!,
+                managerId: form.managerId!,
                 value: form.value !== undefined ? Number(form.value) : 0,
-                startDate: form.startDate ? toInputDate(form.startDate) : undefined,
-                endDate: form.endDate ? toInputDate(form.endDate) : undefined,
+                startDate: form.startDate ? toInputDate(form.startDate) : '',
+                endDate: form.endDate ? toInputDate(form.endDate) : '',
                 status: form.status || 'PENDING',
             },
             {
