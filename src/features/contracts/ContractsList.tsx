@@ -14,6 +14,7 @@ import type { TableColumn } from '../../components/ui/DataTable';
 import type { Contract } from './contracts.types';
 import { useCustomersQuery } from '../customers/hooks/useCustomersQuery';
 import { useUsersQuery } from '../users/hooks/useUsersQuery';
+import { ContractCreateDialog } from './components/ContractCreateDialog';
 
 export function ContractsList() {
     const { data: contracts, isLoading: isLoadingContracts, isError: isErrorContracts } = useContractsQuery();
@@ -27,6 +28,7 @@ export function ContractsList() {
 
     const [viewOpen, setViewOpen] = useState(false);
     const [editOpen, setEditOpen] = useState(false);
+    const [createOpen, setCreateOpen] = useState(false);
 
     const handleOpenMenu = (event: React.MouseEvent<HTMLButtonElement>, row: Contract) => {
         setMenuTrigger(event.currentTarget);
@@ -45,6 +47,9 @@ export function ContractsList() {
     const handleViewToEdit = () => {
         setViewOpen(false);
         setEditOpen(true);
+    };
+    const handleOpenCreate = () => {
+        setCreateOpen(true);
     };
 
     const handleCancel = () => {
@@ -118,7 +123,7 @@ export function ContractsList() {
                         Gerencie o ciclo de vida e a vigência dos acordos.
                     </Typography>
                 </Box>
-                <Button variant="contained" startIcon={<Add />}>
+                <Button variant="contained" startIcon={<Add />} onClick={handleOpenCreate}>
                     Novo Contrato
                 </Button>
             </Box>
@@ -171,6 +176,12 @@ export function ContractsList() {
                     ?? customers?.find((c) => c.id === selectedContract?.customerId)?.corporateName}
                 users={users}
                 onClose={() => setEditOpen(false)}
+            />
+            <ContractCreateDialog
+                open={createOpen}
+                customers={customers}
+                users={users}
+                onClose={() => setCreateOpen(false)}
             />
         </Box>
     );
