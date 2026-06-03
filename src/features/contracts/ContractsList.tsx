@@ -4,7 +4,8 @@ import {
 } from '@mui/material';
 import { Add, MoreVert, Search, FilterList } from '@mui/icons-material';
 
-import { useContractsQuery } from './hooks/useContractsApi';
+import { useContractsQuery, useCancelContractMutation } from './hooks/useContractsApi';
+import { formatDate } from '../../lib/dateUtils';
 import { ContractStatusChip } from './components/ContractStatusChip';
 import { ContractViewDialog } from './components/ContractViewDialog';
 import { ContractEditDialog } from './components/ContractEditDialog';
@@ -19,19 +20,19 @@ export function ContractsList() {
     const { data: customers, isLoading: isLoadingCustomers, isError: isErrorCustomers } = useCustomersQuery();
     const { data: users, isLoading: isLoadingUsers, isError: isErrorUsers } = useUsersQuery();
 
-    const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+    const [menuTrigger, setMenuTrigger] = useState<null | HTMLElement>(null);
     const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
-    const openActionMenu = Boolean(anchorEl);
+    const isMenuOpen = Boolean(menuTrigger);
+    const cancelContract = useCancelContractMutation();
 
-    // Dialogs
     const [viewOpen, setViewOpen] = useState(false);
     const [editOpen, setEditOpen] = useState(false);
 
     const handleOpenMenu = (event: React.MouseEvent<HTMLButtonElement>, row: Contract) => {
-        setAnchorEl(event.currentTarget);
+        setMenuTrigger(event.currentTarget);
         setSelectedContract(row);
     };
-    const handleCloseMenu = () => setAnchorEl(null);
+    const handleCloseMenu = () => setMenuTrigger(null);
 
     const handleOpenView = () => {
         handleCloseMenu();
@@ -46,8 +47,11 @@ export function ContractsList() {
         setEditOpen(true);
     };
 
-    const handleSave = (updated: Partial<Contract>) => {
-        console.log('Saving contract changes:', updated);
+    const handleCancel = () => {
+        if (selectedContract) {
+            cancelContract.mutate(selectedContract.id);
+        }
+        handleCloseMenu();
     };
 
     const formatCurrency = (value: number) =>
@@ -91,7 +95,7 @@ export function ContractsList() {
         {
             id: 'endDate',
             label: 'Vencimento',
-            render: (row) => new Intl.DateTimeFormat('pt-BR').format(new Date(row.endDate))
+            render: (row) => formatDate(row.endDate)
         },
         {
             id: 'actions',
@@ -140,8 +144,8 @@ export function ContractsList() {
             </Paper>
 
             <Menu
-                anchorEl={anchorEl}
-                open={openActionMenu}
+                anchorEl={menuTrigger}
+                open={isMenuOpen}
                 onClose={handleCloseMenu}
                 elevation={2}
                 transformOrigin={{ horizontal: 'right', vertical: 'top' }}
@@ -149,7 +153,7 @@ export function ContractsList() {
             >
                 <MenuItem onClick={handleOpenView} sx={{ fontSize: '0.875rem' }}>Visualizar Detalhes</MenuItem>
                 <MenuItem onClick={handleOpenEdit} sx={{ fontSize: '0.875rem' }}>Editar Contrato</MenuItem>
-                <MenuItem onClick={handleCloseMenu} sx={{ fontSize: '0.875rem', color: 'error.main' }}>Cancelar Contrato</MenuItem>
+                <MenuItem onClick={handleCancel} sx={{ fontSize: '0.875rem', color: 'error.main' }}>Cancelar Contrato</MenuItem>
             </Menu>
 
             <ContractViewDialog
@@ -163,10 +167,10 @@ export function ContractsList() {
             <ContractEditDialog
                 open={editOpen}
                 contract={selectedContract}
-                customers={customers}
+                customerName={customers?.find((c) => c.id === selectedContract?.customerId)?.tradeName
+                    ?? customers?.find((c) => c.id === selectedContract?.customerId)?.corporateName}
                 users={users}
                 onClose={() => setEditOpen(false)}
-                onSave={handleSave}
             />
         </Box>
     );

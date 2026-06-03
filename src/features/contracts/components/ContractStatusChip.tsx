@@ -8,9 +8,9 @@ interface StatusChipProps {
 export function ContractStatusChip({ status }: StatusChipProps) {
     const config: Record<ContractStatus, { label: string; color: 'success' | 'warning' | 'error' | 'default' }> = {
         ACTIVE: { label: 'Ativo', color: 'success' },
-        EXPIRING: { label: 'A Vencer', color: 'warning' },
-        EXPIRED: { label: 'Expirado', color: 'error' },
+        EXPIRED: { label: 'Expirado', color: 'warning' },
         PENDING: { label: 'Pendente', color: 'default' },
+        CANCELLED: { label: 'Cancelado', color: 'error' },
     };
 
     const { label, color } = config[status];

@@ -3,36 +3,35 @@ import {
     Dialog, DialogTitle, DialogContent, DialogActions,
     Button, Box, Typography, Divider, TextField,
     Select, MenuItem as SelectItem, FormControl, InputLabel, IconButton,
-    InputAdornment,
+    InputAdornment, CircularProgress,
 } from '@mui/material';
 import { Close, Save } from '@mui/icons-material';
 import type { Contract, ContractStatus } from '../contracts.types';
-import type { Customer } from '../../customers/customers.types';
 import type { User } from '../../users/users.types';
 import { ContractStatusChip } from './ContractStatusChip';
+import { useUpdateContractMutation } from '../hooks/useContractsApi';
+import { toInputDate } from '../../../lib/dateUtils';
 
 interface ContractEditDialogProps {
     open: boolean;
     contract: Contract | null;
-    customers: Customer[] | undefined;
+    customerName: string | undefined;
     users: User[] | undefined;
     onClose: () => void;
-    onSave: (updated: Partial<Contract>) => void;
+    onSuccess?: () => void;
 }
 
 const CONTRACT_STATUSES: { value: ContractStatus; label: string }[] = [
     { value: 'ACTIVE', label: 'Ativo' },
     { value: 'PENDING', label: 'Pendente' },
-    { value: 'EXPIRING', label: 'A Vencer' },
     { value: 'EXPIRED', label: 'Expirado' },
+    { value: 'CANCELLED', label: 'Cancelado' },
 ];
 
-function toInputDate(date: Date | string): string {
-    return new Date(date).toISOString().slice(0, 10);
-}
 
-export function ContractEditDialog({ open, contract, customers, users, onClose, onSave }: ContractEditDialogProps) {
+export function ContractEditDialog({ open, contract, customerName, users, onClose, onSuccess }: ContractEditDialogProps) {
     const [form, setForm] = useState<Partial<Contract>>({});
+    const updateContract = useUpdateContractMutation();
 
     useEffect(() => {
         if (contract) {
@@ -40,7 +39,6 @@ export function ContractEditDialog({ open, contract, customers, users, onClose, 
                 title: contract.title,
                 value: contract.value,
                 status: contract.status,
-                customerId: contract.customerId,
                 managerId: contract.managerId,
                 startDate: contract.startDate,
                 endDate: contract.endDate,
@@ -55,8 +53,26 @@ export function ContractEditDialog({ open, contract, customers, users, onClose, 
     };
 
     const handleSave = () => {
-        onSave(form);
-        onClose();
+        updateContract.mutate(
+            {
+                id: contract.id,
+                body: {
+                    title: form.title,
+                    managerId: form.managerId,
+                    value: form.value !== undefined ? Number(form.value) : undefined,
+                    startDate: form.startDate ? toInputDate(form.startDate) : undefined,
+                    endDate: form.endDate ? toInputDate(form.endDate) : undefined,
+                    status: form.status,
+                    version: contract.version,
+                },
+            },
+            {
+                onSuccess: () => {
+                    onSuccess?.();
+                    onClose();
+                },
+            }
+        );
     };
 
     return (
@@ -88,22 +104,14 @@ export function ContractEditDialog({ open, contract, customers, users, onClose, 
                     size="small"
                 />
 
-                <FormControl fullWidth size="small">
-                    <InputLabel id="contract-edit-customer-label">Cliente</InputLabel>
-                    <Select
-                        labelId="contract-edit-customer-label"
-                        id="contract-edit-customer"
-                        value={form.customerId ?? ''}
-                        label="Cliente"
-                        onChange={(e) => handleChange('customerId', e.target.value)}
-                    >
-                        {customers?.map((c) => (
-                            <SelectItem key={c.id} value={c.id}>
-                                {c.tradeName || c.corporateName}
-                            </SelectItem>
-                        ))}
-                    </Select>
-                </FormControl>
+                <TextField
+                    id="contract-edit-customer"
+                    label="Cliente"
+                    fullWidth
+                    value={customerName ?? `Cliente #${contract.customerId}`}
+                    size="small"
+                    disabled
+                />
 
                 <FormControl fullWidth size="small">
                     <InputLabel id="contract-edit-manager-label">Responsável</InputLabel>
@@ -159,7 +167,7 @@ export function ContractEditDialog({ open, contract, customers, users, onClose, 
                         fullWidth
                         size="small"
                         value={form.startDate ? toInputDate(form.startDate) : ''}
-                        onChange={(e) => handleChange('startDate', new Date(e.target.value))}
+                        onChange={(e) => handleChange('startDate', e.target.value)}
                         slotProps={{ inputLabel: { shrink: true } }}
                     />
                     <TextField
@@ -169,20 +177,21 @@ export function ContractEditDialog({ open, contract, customers, users, onClose, 
                         fullWidth
                         size="small"
                         value={form.endDate ? toInputDate(form.endDate) : ''}
-                        onChange={(e) => handleChange('endDate', new Date(e.target.value))}
+                        onChange={(e) => handleChange('endDate', e.target.value)}
                         slotProps={{ inputLabel: { shrink: true } }}
                     />
                 </Box>
             </DialogContent>
 
             <DialogActions sx={{ px: 3, py: 2, gap: 1 }}>
-                <Button onClick={onClose} color="inherit" id="contract-edit-cancel-btn">
+                <Button onClick={onClose} color="inherit" id="contract-edit-cancel-btn" disabled={updateContract.isPending}>
                     Cancelar
                 </Button>
                 <Button
                     onClick={handleSave}
                     variant="contained"
-                    startIcon={<Save />}
+                    startIcon={updateContract.isPending ? <CircularProgress size={16} color="inherit" /> : <Save />}
+                    disabled={updateContract.isPending}
                     id="contract-edit-save-btn"
                 >
                     Salvar Alterações

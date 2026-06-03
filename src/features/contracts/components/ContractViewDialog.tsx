@@ -7,6 +7,7 @@ import type { Contract } from '../contracts.types';
 import type { Customer } from '../../customers/customers.types';
 import type { User } from '../../users/users.types';
 import { ContractStatusChip } from './ContractStatusChip';
+import { formatDate } from '../../../lib/dateUtils';
 
 interface ContractViewDialogProps {
     open: boolean;
@@ -42,8 +43,6 @@ export function ContractViewDialog({ open, contract, customer, user, onClose, on
     const formatCurrency = (value: number) =>
         new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 
-    const formatDate = (date: Date) =>
-        new Intl.DateTimeFormat('pt-BR').format(new Date(date));
 
     return (
         <Dialog open={open} onClose={onClose} fullWidth maxWidth="sm" slotProps={{ paper: { sx: { borderRadius: 3 } } }}>

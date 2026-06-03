@@ -1,4 +1,4 @@
-export type ContractStatus = 'ACTIVE' | 'PENDING' | 'EXPIRING' | 'EXPIRED';
+export type ContractStatus = 'ACTIVE' | 'PENDING' | 'EXPIRED' | 'CANCELLED';
 
 export interface Contract {
     id: number;
