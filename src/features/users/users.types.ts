@@ -7,7 +7,7 @@ export interface User {
     email: string;
     role: UserRole;
     status: UserStatus;
-    lastLogin: string | null;
-    createdAt: string;
-    updatedAt: string;
+    lastLogin: Date | null;
+    createdAt: Date;
+    updatedAt: Date;
 }

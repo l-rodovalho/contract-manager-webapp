@@ -1,8 +1,13 @@
+export type CustomerStatus = 'ACTIVE' | 'INACTIVE';
+
 export interface Customer {
-    id: string;
+    id: number;
     corporateName: string;
     tradeName: string;
     documentId: string;
     contactEmail: string;
-    status: 'ACTIVE' | 'INACTIVE';
+    status: CustomerStatus;
+    version: number;
+    createdAt: Date;
+    updatedAt: Date;
 }

@@ -9,9 +9,13 @@ import { ContractStatusChip } from './components/ContractStatusChip';
 import { DataTable } from '../../components/ui/DataTable';
 import type { TableColumn } from '../../components/ui/DataTable';
 import type { Contract } from './contracts.types';
+import { useCustomersQuery } from '../customers/hooks/useCustomersQuery';
+import { useUsersQuery } from '../users/hooks/useUsersQuery';
 
 export function ContractsList() {
-    const { data: contracts, isLoading, isError } = useContractsQuery();
+    const { data: contracts, isLoading: isLoadingContracts, isError: isErrorContracts } = useContractsQuery();
+    const { data: customers, isLoading: isLoadingCustomers, isError: isErrorCustomers } = useCustomersQuery();
+    const { data: users, isLoading: isLoadingUsers, isError: isErrorUsers } = useUsersQuery();
 
     const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
     const openActionMenu = Boolean(anchorEl);
@@ -37,7 +41,7 @@ export function ContractsList() {
             label: 'Cliente',
             render: (row) => (
                 <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                    {row.customerName}
+                    {customers?.find((customer) => customer.id === row.customerId)?.tradeName || customers?.find((customer) => customer.id === row.customerId)?.corporateName || `Cliente ${row.customerId}`}
                 </Typography>
             )
         },
@@ -46,6 +50,11 @@ export function ContractsList() {
             id: 'value',
             label: 'Valor (ARR)',
             render: (row) => formatCurrency(row.value)
+        },
+        {
+            id: 'managerName',
+            label: 'Responsável',
+            render: (row) => users?.find((user) => user.id === row.managerId)?.name || `Usuário ${row.managerId}`
         },
         {
             id: 'status',
@@ -67,7 +76,7 @@ export function ContractsList() {
                 </IconButton>
             )
         }
-    ], []);
+    ], [customers, users]);
 
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
@@ -97,8 +106,8 @@ export function ContractsList() {
                 <DataTable
                     columns={columns}
                     data={contracts}
-                    isLoading={isLoading}
-                    isError={isError}
+                    isLoading={isLoadingContracts || isLoadingCustomers || isLoadingUsers}
+                    isError={isErrorContracts || isErrorCustomers || isErrorUsers}
                     emptyMessage="Nenhum contrato ativo encontrado."
                 />
             </Paper>
