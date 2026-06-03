@@ -4,7 +4,7 @@ import {
 } from '@mui/material';
 import { Add, MoreVert, Search, FilterList } from '@mui/icons-material';
 
-import { useContractsQuery } from './hooks/useContractsQuery';
+import { useContractsQuery } from './hooks/useContractsApi';
 import { ContractStatusChip } from './components/ContractStatusChip';
 import { ContractViewDialog } from './components/ContractViewDialog';
 import { ContractEditDialog } from './components/ContractEditDialog';
